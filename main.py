@@ -1,4 +1,34 @@
-master_pwd = input ("Please enter master password: ")
+#importing the encryption module
+from cryptography.fernet import Fernet
+
+#load and read the saved key, read binary
+def load_key():
+    file = open("key.key", "rb")
+    key = file.read()
+    file.close()
+    return key
+
+
+#master_pwd = input ("Please enter master password: ")
+#encoding masterpass to match with bytes
+key = load_key() # + master_pwd.encode()
+fer = Fernet(key)
+
+"""
+def write_key():
+    key = Fernet.generate_key()
+    #write mode, binary mode
+    #creates a key, call it once in your project
+    with open("key.key", "wb") as key_file:
+        key_file.write(key)
+""" 
+
+#write_key()        
+
+
+
+
+
 
 def view():
     #r mode, reads only
@@ -7,7 +37,8 @@ def view():
             #seperate the username and password for viewing
             data = line.rstrip()
             user, passw = data.split("|")
-            print("User:", user, "- Password:", passw)
+            #decode to remove the byte'' when viewing
+            print("User:", user, "- Password:", fer.decrypt(passw.encode()).decode())
 
 def add():
     name = input("Account name: ")
@@ -19,11 +50,11 @@ def add():
     #append mode, create a new file if doesn't exist, otherwise add to the end of existing file
     with open('passwords.txt', 'a') as file:
         #writes to the file combining account name and password to a new line
-        file.write(name + "|" + pwd + "\n")
+        file.write(name + "|" + fer.encrypt(pwd.encode()).decode() + "\n")
     
 
 while True:
-    mode = input("Add new password or view existing (view, add) ? Press q to quit. ").lower()
+    mode = input("Add new password or view existing (view, add). Press q to quit. ").lower()
     if mode == "q":
         break
 
